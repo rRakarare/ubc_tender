@@ -5,20 +5,24 @@ import CredentialsProvider from "next-auth/providers/credentials";
 const bcrypt = require("bcrypt");
 
 export default NextAuth({
+  session: {
+    strategy: 'jwt',
+  },
+  secret: "sadasddsadsadsadsa",
   providers: [
     CredentialsProvider({
-      id:'credentials',
-      name: "trollo",
       credentials: {
         username: {type:"text"},
         password: {type:"password"},
       },
-      authorize: async (credentials, req) => {
+      authorize: async (credentials) => {
         const userraw = await prisma.user.findFirst({
           where: {
             username: credentials.username,
           },
         });
+
+
 
         const result = bcrypt.compareSync(
           credentials.password,
@@ -33,6 +37,9 @@ export default NextAuth({
             role: userraw.role,
           };
 
+          console.log(user)
+
+
           return user;
         } else {
           return null;
@@ -40,34 +47,23 @@ export default NextAuth({
 
       },
       
-
+      
 
     })
     
   ],
-  secret: "asddwqewqeas",
-  pages: {
-    signIn: '/login',
-  },
   callbacks: {
-    async jwt({ token, user, account }) {
-      if (account && user) {
-        return {
-          ...token,
-          accessToken: user.data.token,
-          refreshToken: user.data.refreshToken,
-        };
-      }
-
-      return token;
-    },
-
     async session({ session, token }) {
-      session.user.accessToken = token.accessToken;
-        
+      session.user = token.user;
       return session;
     },
+    async jwt({ token, user }) {
+      if (user) {
+        token.user = user;
+      }
+      return token;
+    },
   },
-  debug: process.env.NODE_ENV === 'development',
+  
 })
 

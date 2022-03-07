@@ -17,20 +17,21 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-export default function Login({ csrfToken }) {
+export default function Login() {
   const router = useRouter();
   const [username, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
-  const handleLogin = () => {
-    console.log("trololo");
+  const handleLogin = (event) => {
+    event.preventDefault();
+
+
 
     signIn("credentials", {
       redirect: false,
-      username,
-      password,
-      callbackUrl: `${window.location.origin}`,
+      username: username,
+      password: password,
     }).then(function (result) {
       if (result.error !== null) {
         if (result.status === 401) {
@@ -61,6 +62,8 @@ export default function Login({ csrfToken }) {
           </Text>
         </Stack>
         <Box
+          as="form"
+          onSubmit={handleLogin}
           rounded={"lg"}
           bg={useColorModeValue("white", "gray.700")}
           boxShadow={"lg"}
@@ -69,7 +72,7 @@ export default function Login({ csrfToken }) {
           <Stack spacing={4}>
             <FormControl id="username">
               <FormLabel>Username</FormLabel>
-              <input name="csrfToken" type="hidden" defaultValue={csrfToken} />
+
               <Input
                 type="text"
                 value={username}
@@ -101,7 +104,7 @@ export default function Login({ csrfToken }) {
                 _hover={{
                   bg: "blue.500",
                 }}
-                onClick={() => handleLogin()}
+                type= "submit"
               >
                 Sign in
               </Button>
@@ -113,10 +116,3 @@ export default function Login({ csrfToken }) {
   );
 }
 
-export async function getServerSideProps(context) {
-  return {
-    props: {
-      csrfToken: await getCsrfToken(context),
-    },
-  };
-}
