@@ -15,6 +15,7 @@ import {
   Heading,
   Text,
   useColorModeValue,
+  Spinner
 } from "@chakra-ui/react";
 
 export default function Login() {
@@ -23,7 +24,12 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const handleLogin = (event) => {
+
+    setIsLoading(true);
+
     event.preventDefault();
 
 
@@ -34,6 +40,7 @@ export default function Login() {
       password: password,
     }).then(function (result) {
       if (result.error !== null) {
+        setIsLoading(false)
         if (result.status === 401) {
           setLoginError(
             "Your username/password combination was incorrect. Please try again"
@@ -50,11 +57,12 @@ export default function Login() {
   return (
     <Flex
       minH={"100vh"}
+      
       align={"center"}
       justify={"center"}
       bg={useColorModeValue("gray.50", "gray.800")}
     >
-      <Stack spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
+      <Stack width={[350,400,450]} spacing={8} mx={"auto"} maxW={"lg"} py={12} px={6}>
         <Stack align={"center"}>
           <Heading fontSize={"4xl"}>Sign in to your account</Heading>
           <Text fontSize={"lg"} color={"gray.600"}>
@@ -98,6 +106,9 @@ export default function Login() {
                 <Checkbox>Remember me</Checkbox>
                 <Link color={"blue.400"}>Forgot password?</Link>
               </Stack>
+              <Text color={"red"}>
+                {loginError}
+              </Text>
               <Button
                 bg={"blue.400"}
                 color={"white"}
@@ -106,7 +117,8 @@ export default function Login() {
                 }}
                 type= "submit"
               >
-                Sign in
+                Sign In &nbsp;
+                { isLoading && <Spinner/>}
               </Button>
             </Stack>
           </Stack>

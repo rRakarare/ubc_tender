@@ -3,8 +3,6 @@ import Login from "./index.js";
 
 function Auth({ children }) {
   const { data: session, status } = useSession();
-  console.log("check", status !== "loading", status === "authenticated");
-  console.log("status", status);
   if (status !== "loading") {
     if (status === "authenticated") {
       return <>{children}</>;

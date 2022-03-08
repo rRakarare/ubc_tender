@@ -22,3 +22,8 @@ enum Role {
   USER
   ADMIN
 }
+
+model Content {
+  id   Int    @id @default(autoincrement())
+  text String
+}
