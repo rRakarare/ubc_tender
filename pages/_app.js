@@ -8,24 +8,22 @@ import React from "react";
 
 function MyApp({ Component, pageProps }) {
   return (
-    <React.StrictMode>
-      <SessionProvider refetchInterval={5 * 60} session={pageProps.session}>
-        <ChakraProvider>
-          <NextNProgress
-            color="#29D"
-            startPosition={0.3}
-            stopDelayMs={200}
-            height={3}
-            showOnShallow={true}
-          />
-          <Auth>
-            <Navbar>
-              <Component {...pageProps} />
-            </Navbar>
-          </Auth>
-        </ChakraProvider>
-      </SessionProvider>
-    </React.StrictMode>
+    <SessionProvider refetchInterval={5 * 60} session={pageProps.session}>
+      <ChakraProvider>
+        <NextNProgress
+          color="#29D"
+          startPosition={0.3}
+          stopDelayMs={200}
+          height={3}
+          showOnShallow={true}
+        />
+        <Auth>
+          <Navbar>
+            <Component {...pageProps} />
+          </Navbar>
+        </Auth>
+      </ChakraProvider>
+    </SessionProvider>
   );
 }
 
