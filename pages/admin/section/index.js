@@ -7,7 +7,7 @@ import { Button, useDisclosure } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-const model = "User";
+const model = "Section";
 
 export async function getStaticProps() {
   const data = await prisma[model.toLowerCase()].findMany();
@@ -21,7 +21,7 @@ export async function getStaticProps() {
   };
 }
 
-export default function User({ data, fields }) {
+export default function Section({ data, fields }) {
 
   const router = useRouter();
 

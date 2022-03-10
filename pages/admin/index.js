@@ -11,13 +11,15 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 
-
-import { FiServer } from 'react-icons/fi';
+import { FiServer } from "react-icons/fi";
 import NextLink from "next/link";
 import { Link } from "@chakra-ui/react";
 
 export async function getStaticProps() {
+  const dmmf = { ...prisma._dmmf.datamodelEnumMap };
 
+
+  console.log(dmmf);
 
   const models = prisma._dmmf.modelMap;
   const keys = Object.keys(models);
@@ -33,20 +35,30 @@ export async function getStaticProps() {
       });
 
       return {
-        href:`/admin/${name}`,
+        href: `/admin/${name}`,
         name: name,
         counts: countQuery._count.id,
       };
     })
   );
 
+  console.log(data);
 
   return {
-    props: { data },
+    props: {
+      data: {
+        data,
+        dmmf,
+      },
+    },
   };
 }
 
-function StatsCards({ data }) {
+function StatsCards(props) {
+  console.log(props.data.dmmf);
+
+  const data = props.data.data;
+
   const Stats =
     data &&
     data.map((item) => (

@@ -24,6 +24,24 @@ enum Role {
 }
 
 model Content {
-  id   Int    @id @default(autoincrement())
-  text String
+  id        Int     @id @default(autoincrement())
+  text      String
+  section   Section @relation(fields: [sectionID], references: [id])
+  sectionID Int
+  type      Type
+}
+
+enum Type {
+  muss
+  bewertung
+  optional
+  info
+}
+
+model Section {
+  id       Int       @id @default(autoincrement())
+  name     String
+  layer    Int
+  rang     Int
+  contents Content[]
 }
