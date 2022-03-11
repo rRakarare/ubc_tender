@@ -18,7 +18,6 @@ import { Link } from "@chakra-ui/react";
 export async function getStaticProps() {
   const dmmf = { ...prisma._dmmf.datamodelEnumMap };
 
-
   console.log(dmmf);
 
   const models = prisma._dmmf.modelMap;
@@ -42,23 +41,17 @@ export async function getStaticProps() {
     })
   );
 
-  console.log(data);
+
 
   return {
     props: {
-      data: {
-        data,
-        dmmf,
-      },
+      data,
+      dmmf,
     },
   };
 }
 
-function StatsCards(props) {
-  console.log(props.data.dmmf);
-
-  const data = props.data.data;
-
+function StatsCards({ data }) {
   const Stats =
     data &&
     data.map((item) => (
@@ -97,7 +90,7 @@ function StatsCards(props) {
   return <>{Stats}</>;
 }
 
-export default function Admin({ data }) {
+export default function Admin({ data, dmmf }) {
   return (
     <Box maxW="7xl" mx={"auto"} pt={5} px={{ base: 2, sm: 12, md: 17 }}>
       <chakra.h1

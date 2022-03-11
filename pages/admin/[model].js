@@ -1,23 +1,27 @@
 import MaterialTable from "@material-table/core";
-import prisma from "../../../lib/prisma";
+import prisma from "../../lib/prisma";
 import { FiEdit3, FiTrash, FiPlusSquare } from "react-icons/fi";
-import Create from "../../../components/AdminCRUD/Create";
-import Delete from "../../../components/AdminCRUD/Delete";
+import Create from "../../components/AdminCRUD/Create";
+import Delete from "../../components/AdminCRUD/Delete";
 import { Button, useDisclosure } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-const model = "Content";
+function capitalize(s) {
+  return s[0].toUpperCase() + s.slice(1);
+}
 
-export async function getStaticProps() {
-  const data = await prisma[model.toLowerCase()].findMany();
+export async function getServerSideProps({ params }) {
+  const model = params.model.toString();
 
-  const fieldsraw = prisma._dmmf.modelMap[model].fields;
+  const data = await prisma[model].findMany();
 
+  const enums = prisma._dmmf.datamodelEnumMap;
+
+  const fieldsraw = prisma._dmmf.modelMap[capitalize(model)].fields;
 
   /// Filter relational fields out
-  const fields = fieldsraw.filter((item) => item.kind != "object")
-
+  const fields = fieldsraw.filter((item) => item.kind != "object");
 
   /// Create Object with additional Querys (ids -> data)
   let idConverts = {};
@@ -30,42 +34,23 @@ export async function getStaticProps() {
 
   /// Query Additional Data for Selectfields
 
-  const iterateThrough = Object.keys(idConverts)
+  const iterateThrough = Object.keys(idConverts);
 
   const relatedData = await Promise.all(
     iterateThrough.map(async (item) => {
       const name = idConverts[item].toLowerCase();
       const data = await prisma[name].findMany();
-      return {name:item, model:idConverts[item], items:data}
-    }))
-
+      return { name: item, model: idConverts[item], items: data };
+    })
+  );
 
   return {
-    props: { data, fields, relatedData },
+    props: { data, fields, relatedData, model, enums },
   };
 }
 
-export default function Content({ data, fields, relatedData }) {
-
-
-  const relatedNames = relatedData.map(item=> item.name)
-
-
-  const newData = data.map(item => {
-    const names = Object.keys(item);
-
-    let newObj = {}
-
-    names.forEach(name => {
-      if (relatedNames.includes(name)) {
-        newObj[name] = relatedData.find(reldat => reldat.name == name).items.find(entry => entry.id == item[name]).name
-      }
-    })
-
-    return {...item, ...newObj}
-
-  })
-
+export default function Content({ data, fields, relatedData, model, enums }) {
+  const relatedNames = relatedData.map((item) => item.name);
 
   const router = useRouter();
 
@@ -82,17 +67,37 @@ export default function Content({ data, fields, relatedData }) {
 
   const keys = fields.map((item) => item.name);
 
-  const columns = keys.map((key) => ({
-    title: key,
-    field: key,
-  }));
+  const columns = keys.map((key) => {
+    if (relatedNames.includes(key)) {
+      const relatedObjectArray = relatedData.find(
+        (item) => item.name == key
+      ).items;
+
+      return {
+        title: key,
+        field: key,
+        render: (rowData) =>
+          relatedObjectArray.find((obj) => obj.id == rowData[key]).name,
+      };
+    } else {
+      return {
+        title: key,
+        field: key,
+      };
+    }
+  });
+
+  console.log("relatedData", relatedData);
+  console.log("relatedNames", relatedNames);
+  console.log("columns", columns);
+  console.log("data", data);
 
   return (
     <>
       <MaterialTable
         title={`${model} Data`}
         columns={columns}
-        data={newData}
+        data={data}
         actions={[
           {
             icon: () => <FiPlusSquare />,
@@ -131,6 +136,8 @@ export default function Content({ data, fields, relatedData }) {
         fields={fields}
         model={model}
         router={router}
+        relatedData={relatedData}
+        enums={enums}
       />
       <Delete
         isOpen={isOpen2}

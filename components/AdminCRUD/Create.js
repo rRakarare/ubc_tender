@@ -11,16 +11,33 @@ import {
   ModalHeader,
   ModalOverlay,
 } from "@chakra-ui/react";
+import { Select } from "chakra-react-select";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-export default function Create({ isOpen, onClose, fields, model, router }) {
+function capitalize(s) {
+  return s[0].toUpperCase() + s.slice(1);
+}
+
+export default function Create({
+  isOpen,
+  onClose,
+  fields,
+  model,
+  router,
+  relatedData,
+  enums,
+}) {
   const [body, setBody] = useState({});
 
+  console.log(fields)
+
+
+  const relatedNames = relatedData.map((item) => item.name);
+
   useEffect(() => {
-    console.log(body)
-  }, [body])
-  
+    console.log(body);
+  }, [body]);
 
   const createNew = async () => {
     try {
@@ -51,25 +68,67 @@ export default function Create({ isOpen, onClose, fields, model, router }) {
   };
 
   const FormBody = fields.map((item) => {
-
     const name = item.name;
+    const kind = item.kind;
 
-    return (
-      <FormControl key={name}>
-        <FormLabel>{name}</FormLabel>
-        <Input
-          type={type(item.type)}
-          placeholder={name}
-          onChange={(e) =>
-            setBody((state) => {
-              let newState = { ...state };
-              newState[name] = isNaN(Number(e.target.value)) ? e.target.value: Number(e.target.value);
-              return newState;
-            })
-          }
-        />
-      </FormControl>
-    );
+
+    if (relatedNames.includes(name)) {
+      const selectData = relatedData
+        .find((data) => data.name == name)
+        .items.map((entry) => ({
+          value: entry.id,
+          label: entry.name,
+        }));
+
+      return (
+        <FormControl key={name}>
+          <FormLabel>{name}</FormLabel>
+          <Select
+            onChange={(e) =>
+              setBody((state) => ({ ...state, [name]: e.value }))
+            }
+            options={selectData}
+          />
+        </FormControl>
+      );
+    } else if (name === "id") {
+      return null;
+    } else if (kind === "enum") {
+      const selectData = enums[capitalize(name)].values.map((entry) => ({
+        value: entry.name,
+        label: entry.name,
+      }));
+      return (
+        <FormControl key={name}>
+          <FormLabel>{name}</FormLabel>
+          <Select
+            onChange={(e) =>
+              setBody((state) => ({ ...state, [name]: e.value }))
+            }
+            options={selectData}
+          />
+        </FormControl>
+      );
+    } else {
+      return (
+        <FormControl key={name}>
+          <FormLabel>{name}</FormLabel>
+          <Input
+            type={type(item.type)}
+            placeholder={name}
+            onChange={(e) =>
+              setBody((state) => {
+                let newState = { ...state };
+                newState[name] = isNaN(Number(e.target.value))
+                  ? e.target.value
+                  : Number(e.target.value);
+                return newState;
+              })
+            }
+          />
+        </FormControl>
+      );
+    }
   });
 
   return (
