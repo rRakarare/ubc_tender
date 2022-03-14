@@ -18,7 +18,7 @@ import { Link } from "@chakra-ui/react";
 export async function getStaticProps() {
   const dmmf = { ...prisma._dmmf.datamodelEnumMap };
 
-  console.log(dmmf);
+
 
   const models = prisma._dmmf.modelMap;
   const keys = Object.keys(models);

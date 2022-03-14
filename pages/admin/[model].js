@@ -3,6 +3,7 @@ import prisma from "../../lib/prisma";
 import { FiEdit3, FiTrash, FiPlusSquare } from "react-icons/fi";
 import Create from "../../components/AdminCRUD/Create";
 import Delete from "../../components/AdminCRUD/Delete";
+import Edit from "../../components/AdminCRUD/Edit";
 import { Button, useDisclosure } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -63,7 +64,14 @@ export default function Content({ data, fields, relatedData, model, enums }) {
     onOpen: onOpen2,
     onClose: onClose2,
   } = useDisclosure();
+  /// Modal for EDIT
+  const {
+    isOpen: isOpen3,
+    onOpen: onOpen3,
+    onClose: onClose3,
+  } = useDisclosure();
   const [delEntry, setDelEntry] = useState();
+  const [editEntry, setEditEntry] = useState();
 
   const keys = fields.map((item) => item.name);
 
@@ -87,10 +95,46 @@ export default function Content({ data, fields, relatedData, model, enums }) {
     }
   });
 
-  console.log("relatedData", relatedData);
-  console.log("relatedNames", relatedNames);
-  console.log("columns", columns);
-  console.log("data", data);
+  const add = {
+    icon: () => <FiPlusSquare />,
+    isFreeAction: true,
+    onClick: (event) => {
+      /// CREATE
+      onOpen();
+    },
+  };
+
+  const edit = {
+    icon: () => <FiEdit3 />,
+
+    onClick: (event, rowData) => {
+      let obj = { ...rowData };
+      delete obj["tableData"];
+
+      setEditEntry(obj);
+      onOpen3();
+    },
+  };
+
+  const trash = {
+    icon: () => <FiTrash />,
+
+    onClick: (event, rowData) => {
+      /// DELETE
+      setDelEntry(rowData.id);
+      onOpen2();
+    },
+  };
+
+  let actions = []
+
+
+  if (model === "user") {
+    actions = [add, trash];
+  } else {
+    actions = [edit, add, trash];
+  }
+  
 
   return (
     <>
@@ -98,33 +142,7 @@ export default function Content({ data, fields, relatedData, model, enums }) {
         title={`${model} Data`}
         columns={columns}
         data={data}
-        actions={[
-          {
-            icon: () => <FiPlusSquare />,
-            isFreeAction: true,
-            onClick: (event) => {
-              /// CREATE
-              onOpen();
-            },
-          },
-          {
-            icon: () => <FiEdit3 />,
-
-            onClick: (event, rowData) => {
-              const rowJson = JSON.stringify(rowData, null, 2);
-              alert(`Do save operation : ${rowJson}`);
-            },
-          },
-          {
-            icon: () => <FiTrash />,
-
-            onClick: (event, rowData) => {
-              /// DELETE
-              setDelEntry(rowData.id);
-              onOpen2();
-            },
-          },
-        ]}
+        actions={actions}
         options={{
           actionsColumnIndex: -1,
         }}
@@ -133,6 +151,17 @@ export default function Content({ data, fields, relatedData, model, enums }) {
         isOpen={isOpen}
         onOpen={onOpen}
         onClose={onClose}
+        fields={fields}
+        model={model}
+        router={router}
+        relatedData={relatedData}
+        enums={enums}
+      />
+      <Edit
+        isOpen={isOpen3}
+        onOpen={onOpen3}
+        onClose={onClose3}
+        editEntry={editEntry}
         fields={fields}
         model={model}
         router={router}

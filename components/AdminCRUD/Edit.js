@@ -16,7 +16,6 @@ import { Select } from "chakra-react-select";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
@@ -28,20 +27,26 @@ export default function Create({
   model,
   router,
   relatedData,
+  editEntry,
   enums,
 }) {
-  
-  const [loading, setLoading] = useState(false);
-  const [body, setBody] = useState({});
-
+  const [body, setBody] = useState(editEntry);
+  const [loading, setLoading] = useState(false)
 
   const relatedNames = relatedData.map((item) => item.name);
 
+
+  useEffect(() => {
+    setBody(editEntry)
+  }, [editEntry]);
+
+
+
   const createNew = async () => {
-    setLoading(true);
+    setLoading(true)
     try {
       const res = await axios.post(
-        "../api/admin/create",
+        "../api/admin/update",
         {
           model: model,
           data: body,
@@ -49,7 +54,7 @@ export default function Create({
         { "Content-Type": "application/json" }
       );
       onClose();
-      setLoading(false);
+      setLoading(false)
       router.replace(router.asPath);
     } catch (err) {
       console.log(err);
@@ -79,10 +84,13 @@ export default function Create({
           label: entry.name,
         }));
 
+        
+
       return (
         <FormControl key={name}>
           <FormLabel>{name}</FormLabel>
           <Select
+            defaultValue={body && selectData.find(data => data.value == body[name])}
             onChange={(e) =>
               setBody((state) => ({ ...state, [name]: e.value }))
             }
@@ -97,10 +105,13 @@ export default function Create({
         value: entry.name,
         label: entry.name,
       }));
+
+
       return (
         <FormControl key={name}>
           <FormLabel>{name}</FormLabel>
           <Select
+            defaultValue={body && selectData.find(data => data.value == body[name])}
             onChange={(e) =>
               setBody((state) => ({ ...state, [name]: e.value }))
             }
@@ -108,32 +119,16 @@ export default function Create({
           />
         </FormControl>
       );
-    } else if (name === "password") {
-      return (
-        <FormControl key={name}>
-          <FormLabel>{name}</FormLabel>
-          <Input
-            type={"password"}
-            placeholder={name}
-            onChange={(e) =>
-              setBody((state) => {
-                let newState = { ...state };
-                newState[name] = isNaN(Number(e.target.value))
-                  ? e.target.value
-                  : Number(e.target.value);
-                return newState;
-              })
-            }
-          />
-        </FormControl>
-      );
     } else {
+
+
       return (
         <FormControl key={name}>
           <FormLabel>{name}</FormLabel>
           <Input
             type={type(item.type)}
             placeholder={name}
+            value={body && body[name]}
             onChange={(e) =>
               setBody((state) => {
                 let newState = { ...state };

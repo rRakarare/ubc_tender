@@ -7,13 +7,18 @@ import {
     ModalFooter,
     ModalHeader,
     ModalOverlay,
+    Spinner,
   } from "@chakra-ui/react";
   import axios from "axios";
+import { useState } from "react";
   
   export default function Delete({ isOpen, onClose, model, router, delEntry }) {
 
+    const [loading, setLoading] = useState(false)
+
   
     const deleteEntry = async () => {
+      setLoading(true)
       try {
         const res = await axios.post(
           "../api/admin/delete",
@@ -24,7 +29,8 @@ import {
           { "Content-Type": "application/json" }
         );
         onClose()
-        router.reload()
+        setLoading(false)
+        router.replace(router.asPath);
       } catch(err) {
         console.log(err)
       }
@@ -48,7 +54,7 @@ import {
                 Close
               </Button>
               <Button onClick={() => deleteEntry()} colorScheme="blue">
-                Delete
+                Delete &nbsp; {loading ? <Spinner /> : null}
               </Button>
             </ModalFooter>
           </ModalContent>
