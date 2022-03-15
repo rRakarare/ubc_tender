@@ -36,11 +36,7 @@ import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
 
 const LinkItems = [
-  { name: "Home", icon: FiHome },
-  { name: "Trending", icon: FiTrendingUp },
-  { name: "Explore", icon: FiCompass },
-  { name: "Favourites", icon: FiStar },
-  { name: "Settings", icon: FiSettings },
+  { name: "Home", icon: FiHome, href: "/" },
 ];
 
 export default function Navbar({ children }) {
@@ -92,9 +88,13 @@ const SidebarContent = ({ onClose, ...rest }) => {
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NavItem key={link.name} icon={link.icon}>
-          {link.name}
-        </NavItem>
+        <NextLink passHref href={link.href}>
+          <Link>
+            <NavItem key={link.name} icon={link.icon}>
+              {link.name}
+            </NavItem>
+          </Link>
+        </NextLink>
       ))}
     </Box>
   );

@@ -1,12 +1,17 @@
 import MaterialTable from "@material-table/core";
 import prisma from "../../lib/prisma";
 import { FiEdit3, FiTrash, FiPlusSquare } from "react-icons/fi";
+import { FaFileExcel } from "react-icons/fa";
 import Create from "../../components/AdminCRUD/Create";
 import Delete from "../../components/AdminCRUD/Delete";
 import Edit from "../../components/AdminCRUD/Edit";
+import Import from "../../components/AdminCRUD/Import";
 import { Button, useDisclosure } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
+
+import safeWorkBook from "../../lib/excelJS"
+import {exportData} from "../../lib/excelJS/admin/exportData"
 
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
@@ -70,6 +75,11 @@ export default function Content({ data, fields, relatedData, model, enums }) {
     onOpen: onOpen3,
     onClose: onClose3,
   } = useDisclosure();
+  const {
+    isOpen: isOpen4,
+    onOpen: onOpen4,
+    onClose: onClose4,
+  } = useDisclosure();
   const [delEntry, setDelEntry] = useState();
   const [editEntry, setEditEntry] = useState();
 
@@ -126,15 +136,31 @@ export default function Content({ data, fields, relatedData, model, enums }) {
     },
   };
 
-  let actions = []
+  const exportxlsx = {
+    icon: () => <FaFileExcel color="green" />,
+    isFreeAction: true,
+    onClick: (event) => {
+      const headers = fields.map(item => ({header: item.name, key: item.name}))
+      const book = exportData(headers,data)
+      safeWorkBook(book, `${model}-data`)
+    },
+  };
 
+  const importxlsx = {
+    icon: () => <FaFileExcel color="blue" />,
+    isFreeAction: true,
+    onClick: (event) => {
+      onOpen4();
+    },
+  };
+
+  let actions = [];
 
   if (model === "user") {
-    actions = [add, trash];
+    actions = [add, exportxlsx, importxlsx, trash];
   } else {
-    actions = [edit, add, trash];
+    actions = [edit, exportxlsx, importxlsx, add, trash];
   }
-  
 
   return (
     <>
@@ -172,6 +198,14 @@ export default function Content({ data, fields, relatedData, model, enums }) {
         isOpen={isOpen2}
         onOpen={onOpen2}
         onClose={onClose2}
+        model={model}
+        delEntry={delEntry}
+        router={router}
+      />
+      <Import
+        isOpen={isOpen4}
+        onOpen={onOpen4}
+        onClose={onClose4}
         model={model}
         delEntry={delEntry}
         router={router}
