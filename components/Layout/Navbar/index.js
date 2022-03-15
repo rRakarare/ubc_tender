@@ -34,10 +34,9 @@ import {
 import { BsPerson } from "react-icons/bs";
 import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
+import React from "react";
 
-const LinkItems = [
-  { name: "Home", icon: FiHome, href: "/" },
-];
+const LinkItems = [{ name: "Home", icon: FiHome, href: "/" }];
 
 export default function Navbar({ children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -88,25 +87,17 @@ const SidebarContent = ({ onClose, ...rest }) => {
         <CloseButton display={{ base: "flex", md: "none" }} onClick={onClose} />
       </Flex>
       {LinkItems.map((link) => (
-        <NextLink passHref href={link.href}>
-          <Link>
-            <NavItem key={link.name} icon={link.icon}>
-              {link.name}
-            </NavItem>
-          </Link>
+        <NextLink passHref href={link.href} key={link.name}>
+          <NavItem icon={link.icon}>{link.name}</NavItem>
         </NextLink>
       ))}
     </Box>
   );
 };
 
-const NavItem = ({ icon, children, ...rest }) => {
+const NavItem = React.forwardRef(({ icon, children, ...rest },ref) => {
   return (
-    <Link
-      href="#"
-      style={{ textDecoration: "none" }}
-      _focus={{ boxShadow: "none" }}
-    >
+    <Link style={{ textDecoration: "none" }} _focus={{ boxShadow: "none" }}>
       <Flex
         align="center"
         p="4"
@@ -134,7 +125,7 @@ const NavItem = ({ icon, children, ...rest }) => {
       </Flex>
     </Link>
   );
-};
+});
 
 const MobileNav = ({ onOpen, ...rest }) => {
   const { data: session, status } = useSession();
