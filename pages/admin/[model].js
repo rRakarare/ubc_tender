@@ -10,12 +10,21 @@ import { Button, useDisclosure } from "@chakra-ui/react";
 import { useRouter } from "next/router";
 import { useState } from "react";
 
-import safeWorkBook from "../../lib/excelJS"
-import {exportData} from "../../lib/excelJS/admin/exportData"
+import safeWorkBook from "../../lib/excelJS";
+import { exportData } from "../../lib/excelJS/admin/exportData";
+import { capitalize, lowermize } from "../../lib/main";
 
-function capitalize(s) {
-  return s[0].toUpperCase() + s.slice(1);
-}
+
+
+
+// Display field of Prisma Model if Related
+
+const displayMap = {
+  Section: "name",
+  Content: 'text',
+  Project: 'name'
+
+};
 
 export async function getServerSideProps({ params }) {
   const model = params.model.toString();
@@ -26,6 +35,8 @@ export async function getServerSideProps({ params }) {
 
   const fieldsraw = prisma._dmmf.modelMap[capitalize(model)].fields;
 
+  console.log(fieldsraw)
+
   /// Filter relational fields out
   const fields = fieldsraw.filter((item) => item.kind != "object");
 
@@ -33,22 +44,35 @@ export async function getServerSideProps({ params }) {
   let idConverts = {};
 
   fieldsraw.forEach((field, i) => {
-    if (field.relationFromFields) {
+    if (field.relationFromFields && field.relationFromFields.length > 0 ) {
       idConverts[field.relationFromFields] = field.type;
     }
   });
+
+  console.log(idConverts)
 
   /// Query Additional Data for Selectfields
 
   const iterateThrough = Object.keys(idConverts);
 
-  const relatedData = await Promise.all(
-    iterateThrough.map(async (item) => {
-      const name = idConverts[item].toLowerCase();
-      const data = await prisma[name].findMany();
-      return { name: item, model: idConverts[item], items: data };
-    })
-  );
+  let relatedData = []
+
+  if (iterateThrough.length > 0) {
+    relatedData = await Promise.all(
+      iterateThrough.map(async (item) => {
+        const name = lowermize(idConverts[item]);
+        const data = await prisma[name].findMany();
+        return {
+          name: item,
+          model: idConverts[item],
+          map: displayMap[idConverts[item]],
+          items: data,
+        };
+      })
+    );
+  }
+
+  console.log("rel", relatedData)
 
   return {
     props: { data, fields, relatedData, model, enums },
@@ -87,15 +111,16 @@ export default function Content({ data, fields, relatedData, model, enums }) {
 
   const columns = keys.map((key) => {
     if (relatedNames.includes(key)) {
-      const relatedObjectArray = relatedData.find(
-        (item) => item.name == key
-      ).items;
+      const relatedObject = relatedData.find((item) => item.name == key);
+      const relatedObjectArray = relatedObject.items;
 
       return {
         title: key,
         field: key,
         render: (rowData) =>
-          relatedObjectArray.find((obj) => obj.id == rowData[key]).name,
+          relatedObjectArray.find((obj) => obj.id == rowData[key])[
+            relatedObject.map
+          ],
       };
     } else {
       return {
@@ -140,9 +165,12 @@ export default function Content({ data, fields, relatedData, model, enums }) {
     icon: () => <FaFileExcel color="green" />,
     isFreeAction: true,
     onClick: (event) => {
-      const headers = fields.map(item => ({header: item.name, key: item.name}))
-      const book = exportData(headers,data)
-      safeWorkBook(book, `${model}-data`)
+      const headers = fields.map((item) => ({
+        header: item.name,
+        key: item.name,
+      }));
+      const book = exportData(headers, data);
+      safeWorkBook(book, `${model}-data`);
     },
   };
 

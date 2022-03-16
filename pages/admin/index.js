@@ -15,17 +15,25 @@ import { FiServer } from "react-icons/fi";
 import NextLink from "next/link";
 import { Link } from "@chakra-ui/react";
 
+function lowermize(s) {
+  return s[0].toLowerCase() + s.slice(1);
+}
+
 export async function getStaticProps() {
   const dmmf = { ...prisma._dmmf.datamodelEnumMap };
 
 
+  
 
   const models = prisma._dmmf.modelMap;
+
+
   const keys = Object.keys(models);
 
   const data = await Promise.all(
     keys.map(async (item) => {
-      const name = item.toLowerCase();
+      const name = lowermize(item);
+      console.log("name",name)
 
       const countQuery = await prisma[name].aggregate({
         _count: {

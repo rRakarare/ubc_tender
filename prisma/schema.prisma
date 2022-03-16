@@ -11,11 +11,11 @@ datasource db {
 }
 
 model User {
-  id       Int    @id @default(autoincrement())
-  username String @unique
+  id       Int      @id @default(autoincrement())
+  username String   @unique
   password String
   isActive IsActive @default(INACTIVE)
-  role     Role   @default(USER)
+  role     Role     @default(USER)
 }
 
 enum IsActive {
@@ -28,12 +28,27 @@ enum Role {
   ADMIN
 }
 
+model Project {
+  id       Int                  @id @default(autoincrement())
+  name     String
+  contents ContentsOnProjects[]
+}
+
 model Content {
-  id        Int     @id @default(autoincrement())
+  id        Int                  @id @default(autoincrement())
   text      String
-  section   Section @relation(fields: [sectionID], references: [id])
-  sectionID Int
+  section   Section              @relation(fields: [sectionId], references: [id])
+  sectionId Int
   type      Type
+  projects  ContentsOnProjects[]
+}
+
+model ContentsOnProjects {
+  id        Int     @id @default(autoincrement())
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId Int
+  content   Content @relation(fields: [contentId], references: [id])
+  contentId  Int
 }
 
 enum Type {

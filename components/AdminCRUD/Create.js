@@ -16,7 +16,6 @@ import { Select } from "chakra-react-select";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-
 function capitalize(s) {
   return s[0].toUpperCase() + s.slice(1);
 }
@@ -30,10 +29,8 @@ export default function Create({
   relatedData,
   enums,
 }) {
-  
   const [loading, setLoading] = useState(false);
   const [body, setBody] = useState({});
-
 
   const relatedNames = relatedData.map((item) => item.name);
 
@@ -72,12 +69,11 @@ export default function Create({
     const kind = item.kind;
 
     if (relatedNames.includes(name)) {
-      const selectData = relatedData
-        .find((data) => data.name == name)
-        .items.map((entry) => ({
-          value: entry.id,
-          label: entry.name,
-        }));
+      const relatedDataObj = relatedData.find((data) => data.name == name);
+      const selectData = relatedDataObj.items.map((entry) => ({
+        value: entry.id,
+        label: entry[relatedDataObj.map],
+      }));
 
       return (
         <FormControl key={name}>

@@ -77,12 +77,11 @@ export default function Create({
     const kind = item.kind;
 
     if (relatedNames.includes(name)) {
-      const selectData = relatedData
-        .find((data) => data.name == name)
-        .items.map((entry) => ({
-          value: entry.id,
-          label: entry.name,
-        }));
+      const relatedDataObj = relatedData.find((data) => data.name == name);
+      const selectData = relatedDataObj.items.map((entry) => ({
+        value: entry.id,
+        label: entry[relatedDataObj.map],
+      }));
 
         
 

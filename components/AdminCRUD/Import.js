@@ -10,7 +10,7 @@ import {
   Spinner,
 } from "@chakra-ui/react";
 import axios from "axios";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import styled from "styled-components";
 
@@ -44,12 +44,20 @@ const Container = styled.div`
 `;
 
 export default function Import({ isOpen, onClose, model, router, delEntry }) {
+
+  const [body, setBody] = useState([])
+
   const loadBook = async (file) => {
     const ExcelJS = require("exceljs");
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.load(file);
     return workbook;
   };
+
+  useEffect(() => {
+    console.log(body)
+  }, [body])
+  
 
   const onDrop = useCallback((acceptedFiles) => {
     acceptedFiles.forEach((file) => {
@@ -62,13 +70,25 @@ export default function Import({ isOpen, onClose, model, router, delEntry }) {
         const binaryStr = reader.result;
         loadBook(binaryStr).then((workbook) => {
           const sheet = workbook.worksheets[0];
+          setBody([])
+          let keys = []
           sheet.eachRow({ includeEmpty: false },(row, rowNumber) => {
 
             if (rowNumber == 1) {
                 console.log("headers", row.values.filter(item => item != null))
+                keys = row.values.filter(item => item != null)
+                
             } else {
-                console.log("values", row.values.filter(item => item != null))
+                const values = row.values.filter(item => item != null)
+                let datapoint = {}
+                keys.forEach((key,i) => {
+                  datapoint[key] = values[i]
+                })
+                setBody(state => ([...state, datapoint]))
+                
             }
+          
+           
             
           });
         });
@@ -82,14 +102,14 @@ export default function Import({ isOpen, onClose, model, router, delEntry }) {
 
   const [loading, setLoading] = useState(false);
 
-  const deleteEntry = async () => {
+  const createMany = async () => {
     setLoading(true);
     try {
       const res = await axios.post(
-        "../api/admin/delete",
+        "../api/admin/createMany",
         {
           model: model,
-          data: { id: delEntry },
+          data: body,
         },
         { "Content-Type": "application/json" }
       );
@@ -115,14 +135,20 @@ export default function Import({ isOpen, onClose, model, router, delEntry }) {
               <input {...getInputProps()} />
               <p>Drag 'n' drop some files here, or click to select files</p>
             </Container>
+            <p>
+              Data found
+            </p>
+            <p>
+              {JSON.stringify(body)}
+            </p>
           </ModalBody>
 
           <ModalFooter>
             <Button colorScheme="red" mr={3} onClick={onClose}>
               Close
             </Button>
-            <Button onClick={() => deleteEntry()} colorScheme="blue">
-              Delete &nbsp; {loading ? <Spinner /> : null}
+            <Button onClick={() => createMany()} colorScheme="blue">
+              Import &nbsp; {loading ? <Spinner /> : null}
             </Button>
           </ModalFooter>
         </ModalContent>
