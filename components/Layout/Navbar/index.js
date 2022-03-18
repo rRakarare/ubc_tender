@@ -36,7 +36,7 @@ import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import React from "react";
 
-const LinkItems = [{ name: "Home", icon: FiHome, href: "/" }];
+const LinkItems = [{ name: "Home", icon: FiHome, href: "/" },{ name: "Projekte", icon: FiStar, href: "/projekte" }];
 
 export default function Navbar({ children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();

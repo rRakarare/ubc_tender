@@ -7,6 +7,7 @@ const bcrypt = require("bcrypt");
 export default NextAuth({
   session: {
     strategy: 'jwt',
+    maxAge: 1 * 24 * 60 * 60
   },
   secret: "sadasddsadsadsadsa",
   providers: [

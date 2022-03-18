@@ -29,9 +29,27 @@ enum Role {
 }
 
 model Project {
-  id       Int                  @id @default(autoincrement())
+  id             Int                  @id @default(autoincrement())
+  name           String
+  contents       ContentsOnProjects[]
+  projectType    ProjectType          @relation(fields: [projectTypeId], references: [id])
+  projectTypeId  Int
+  tags           Tag[]
+  TagsOnProjects TagsOnProjects[]
+}
+
+model ProjectType {
+  id       Int       @id @default(autoincrement())
   name     String
-  contents ContentsOnProjects[]
+  projects Project[]
+}
+
+model Tag {
+  id             Int              @id @default(autoincrement())
+  name           String
+  projects       Project[]
+  TagsOnProjects TagsOnProjects[]
+  colorSchema          ColorSchema
 }
 
 model Content {
@@ -43,12 +61,35 @@ model Content {
   projects  ContentsOnProjects[]
 }
 
+model TagsOnProjects {
+  id        Int     @id @default(autoincrement())
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId Int
+  tag       Tag     @relation(fields: [tagId], references: [id])
+  tagId     Int
+}
+
 model ContentsOnProjects {
   id        Int     @id @default(autoincrement())
   project   Project @relation(fields: [projectId], references: [id])
   projectId Int
   content   Content @relation(fields: [contentId], references: [id])
-  contentId  Int
+  contentId Int
+}
+
+enum ColorSchema {
+  whiteAlpha
+  blackAlpha
+  gray
+  red
+  orange
+  yellow
+  green
+  teal
+  blue
+  cyan
+  purple
+  pink
 }
 
 enum Type {

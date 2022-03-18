@@ -22,7 +22,11 @@ import { capitalize, lowermize } from "../../lib/main";
 const displayMap = {
   Section: "name",
   Content: 'text',
-  Project: 'name'
+  Project: 'name',
+  Tag: 'name',
+  ProjectType: 'name',
+  
+
 
 };
 
