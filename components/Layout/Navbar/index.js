@@ -36,7 +36,11 @@ import NextLink from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import React from "react";
 
-const LinkItems = [{ name: "Home", icon: FiHome, href: "/" },{ name: "Projekte", icon: FiStar, href: "/projekte" }];
+const LinkItems = [
+  { name: "Home", icon: FiHome, href: "/" },
+  { name: "Projekte", icon: FiStar, href: "/projekte" },
+  { name: "Clients", icon: FiStar, href: "/clients" },
+];
 
 export default function Navbar({ children }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -95,7 +99,7 @@ const SidebarContent = ({ onClose, ...rest }) => {
   );
 };
 
-const NavItem = React.forwardRef(({ icon, children, ...rest },ref) => {
+const NavItem = React.forwardRef(({ icon, children, ...rest }, ref) => {
   return (
     <Link style={{ textDecoration: "none" }} _focus={{ boxShadow: "none" }}>
       <Flex

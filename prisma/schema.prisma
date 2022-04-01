@@ -38,6 +38,12 @@ model Project {
   TagsOnProjects TagsOnProjects[]
 }
 
+model Client {
+  id     Int    @id @default(autoincrement())
+  name   String
+  imgUrl String
+}
+
 model ProjectType {
   id       Int       @id @default(autoincrement())
   name     String
@@ -49,7 +55,7 @@ model Tag {
   name           String
   projects       Project[]
   TagsOnProjects TagsOnProjects[]
-  colorSchema          ColorSchema
+  colorSchema    ColorSchema
 }
 
 model Content {
