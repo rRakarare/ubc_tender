@@ -10,10 +10,12 @@ import {
   useDisclosure,
 } from "@chakra-ui/react";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import CropperComp from "../../components/Unsorted/Cropper";
 import { useToast } from "@chakra-ui/react";
+import axios from "axios";
+
 
 export default function Client() {
   const [imgUrl, setImgUrl] = useState();
@@ -21,6 +23,7 @@ export default function Client() {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [isLoading, setLoading] = useBoolean(false);
   const toast = useToast();
+  const [blober, setBlober] = useState();
 
   const paster = (e) => {
     const image = e.clipboardData.files[0];
@@ -50,8 +53,26 @@ export default function Client() {
     formState: { errors },
   } = useForm();
 
+  const fetcher = async () => {
+    let blob = await fetch(croppedImage).then(r => r.blob());
+    console.log("blob",blob)
+    setBlober(blob)
+  }
+
+  useEffect(() => {
+    console.log(croppedImage)
+    fetcher()
+    
+  }, [croppedImage])
+  
+
   const submit = async (data) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+    formData.append("image", blober);
+
     setLoading.on();
+    await axios.post("api/client/create",formData);
     setTimeout(() => {
       setLoading.off();
       alert(JSON.stringify({ ...data, img: croppedImage }, null, 2));
