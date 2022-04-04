@@ -98,7 +98,7 @@ export default function Load({ data }) {
   };
 
   return (
-    <Container as="form" mb={12} onSubmit={handleSubmit(submit)}>
+    <Container as="form" bg={"white"} p={6} onSubmit={handleSubmit(submit)}>
       <ControlledSelect
         control={control}
         isMulti
@@ -111,7 +111,7 @@ export default function Load({ data }) {
         components={customComponents}
         closeMenuOnSelect={false}
       />
-      <FormControl py={4} isInvalid={errors.name}>
+      <FormControl pb={4} isInvalid={errors.name}>
         <FormLabel htmlFor="name">Projectname</FormLabel>
         <Input
           id="name"
