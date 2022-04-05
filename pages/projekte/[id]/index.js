@@ -1,20 +1,24 @@
+import Navigation from "../../../components/Project/Navigation";
 import prisma from "../../../lib/prisma";
 
-
 export async function getServerSideProps({ params }) {
+  const projectId = Number(params.id);
 
-    const projectId = Number(params.id)
-  
-    const project = await prisma.project.findFirst({
-        where: {id: projectId}
-    })
-  
-    return {
-      props: { project },
-    };
-  }
+  const project = await prisma.project.findFirst({
+    where: { id: projectId },
+  });
 
-export default function Project({project}) {
-    console.log(project)
-    return <div>{project.name}</div>
+  return {
+    props: { project },
+  };
+}
+
+export default function Project({ project }) {
+  console.log(project);
+  return (
+    <>
+      <Navigation />
+      <div>{project.name}</div>
+    </>
+  );
 }
