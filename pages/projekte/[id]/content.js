@@ -1,14 +1,24 @@
 import Navigation from "../../../components/Project/Navigation";
-import { getServerSideProps } from ".";
+
+export async function getServerSideProps({ params }) {
+  const projectId = Number(params.id);
+
+  const project = await prisma.project.findFirst({
+    where: { id: projectId },
+  });
+
+  return {
+    props: { project },
+  };
+}
 
 export default function Project({ project }) {
-  console.log(project);
+
   return (
     <>
-      <Navigation />
-      <div>Content {project.name}</div>
+      <Navigation path={{ name: "Content", id: project.id }} />
+      <div>{project.name}</div>
     </>
   );
 }
 
-export { getServerSideProps };

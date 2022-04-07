@@ -14,10 +14,10 @@ export async function getServerSideProps({ params }) {
 }
 
 export default function Project({ project }) {
-  console.log(project);
+
   return (
     <>
-      <Navigation />
+      <Navigation path={{name:"Main", id:project.id}} />
       <div>{project.name}</div>
     </>
   );
