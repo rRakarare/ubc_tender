@@ -14,20 +14,15 @@ import safeWorkBook from "../../lib/excelJS";
 import { exportData } from "../../lib/excelJS/admin/exportData";
 import { capitalize, lowermize } from "../../lib/main";
 
-
-
-
 // Display field of Prisma Model if Related
 
 const displayMap = {
   Section: "name",
-  Content: 'text',
-  Project: 'name',
-  Tag: 'name',
-  ProjectType: 'name',
-  
-
-
+  Content: "text",
+  Project: "name",
+  Tag: "name",
+  ProjectType: "name",
+  Client: "name",
 };
 
 export async function getServerSideProps({ params }) {
@@ -39,7 +34,7 @@ export async function getServerSideProps({ params }) {
 
   const fieldsraw = prisma._dmmf.modelMap[capitalize(model)].fields;
 
-  console.log(fieldsraw)
+  console.log(fieldsraw);
 
   /// Filter relational fields out
   const fields = fieldsraw.filter((item) => item.kind != "object");
@@ -48,18 +43,18 @@ export async function getServerSideProps({ params }) {
   let idConverts = {};
 
   fieldsraw.forEach((field, i) => {
-    if (field.relationFromFields && field.relationFromFields.length > 0 ) {
+    if (field.relationFromFields && field.relationFromFields.length > 0) {
       idConverts[field.relationFromFields] = field.type;
     }
   });
 
-  console.log(idConverts)
+  console.log(idConverts);
 
   /// Query Additional Data for Selectfields
 
   const iterateThrough = Object.keys(idConverts);
 
-  let relatedData = []
+  let relatedData = [];
 
   if (iterateThrough.length > 0) {
     relatedData = await Promise.all(
@@ -76,7 +71,7 @@ export async function getServerSideProps({ params }) {
     );
   }
 
-  console.log("rel", relatedData)
+  console.log("rel", relatedData);
 
   return {
     props: { data, fields, relatedData, model, enums },
@@ -114,17 +109,26 @@ export default function Content({ data, fields, relatedData, model, enums }) {
   const keys = fields.map((item) => item.name);
 
   const columns = keys.map((key) => {
+    console.log(key);
     if (relatedNames.includes(key)) {
       const relatedObject = relatedData.find((item) => item.name == key);
       const relatedObjectArray = relatedObject.items;
 
+      console.log("rela", relatedObjectArray);
+      console.log("relaobj", relatedObject);
+
       return {
         title: key,
         field: key,
-        render: (rowData) =>
-          relatedObjectArray.find((obj) => obj.id == rowData[key])[
-            relatedObject.map
-          ],
+        render: (rowData) => {
+          if (rowData[key]) {
+            return relatedObjectArray.find((obj) => obj.id == rowData[key])[
+              relatedObject.map
+            ];
+          } else {
+            return"none"
+          }
+        },
       };
     } else {
       return {

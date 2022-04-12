@@ -31,40 +31,64 @@ enum Role {
 model Project {
   id             Int                  @id @default(autoincrement())
   name           String
+  service        String?
+  ref            String?
+  short          String?
+  year           Int?
   contents       ContentsOnProjects[]
-  projectType    ProjectType          @relation(fields: [projectTypeId], references: [id])
-  projectTypeId  Int
-  tags           Tag[]
+  client         Client               @relation(fields: [clientId], references: [id])
+  clientId       Int
   TagsOnProjects TagsOnProjects[]
+
 }
 
 model Client {
-  id     Int    @id @default(autoincrement())
-  name   String
-  imgUrl String
-}
-
-model ProjectType {
   id       Int       @id @default(autoincrement())
   name     String
+  imgUrl   String
   projects Project[]
 }
 
 model Tag {
   id             Int              @id @default(autoincrement())
   name           String
-  projects       Project[]
   TagsOnProjects TagsOnProjects[]
   colorSchema    ColorSchema
 }
 
 model Content {
-  id        Int                  @id @default(autoincrement())
-  text      String
-  section   Section              @relation(fields: [sectionId], references: [id])
-  sectionId Int
-  type      Type
-  projects  ContentsOnProjects[]
+  id          Int                      @id @default(autoincrement())
+  text        String
+  textShort   String
+  textMatrix  String
+  section     Section                  @relation(fields: [sectionId], references: [id])
+  sectionId   Int
+  type        Type
+  projects    ContentsOnProjects[]
+  projectType ProjectTypesOnContents[]
+  var         String?
+  vartype     Vartype?
+}
+
+enum Vartype {
+  integer
+  float
+  currency
+  file
+}
+
+model ProjectType {
+  id       Int                      @id @default(autoincrement())
+  name     String
+  contents ProjectTypesOnContents[]
+}
+
+model ProjectTypesOnContents {
+  id            Int         @id @default(autoincrement())
+  content       Content     @relation(fields: [contentId], references: [id])
+  contentId     Int
+  projectType   ProjectType @relation(fields: [projectTypeId], references: [id])
+  projectTypeId Int
 }
 
 model TagsOnProjects {
@@ -106,9 +130,12 @@ enum Type {
 }
 
 model Section {
-  id       Int       @id @default(autoincrement())
-  name     String
-  layer    Int
-  rang     Int
+  id              Int      @id @default(autoincrement())
+  name            String
+  rang            Int
+  parentSectionId Int?     @unique
+  parentSection   Section? @relation("parentChild", fields: [parentSectionId], references: [id])
+  childSection    Section? @relation("parentChild")
+
   contents Content[]
 }

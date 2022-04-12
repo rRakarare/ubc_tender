@@ -45,7 +45,6 @@ const customComponents = {
 export async function getStaticProps() {
   const query = await prisma.project.findMany({
     include: {
-      projectType: true,
       TagsOnProjects: {
         include: {
           tag: true,
@@ -58,7 +57,6 @@ export async function getStaticProps() {
     return {
       id: item.id,
       name: item.name,
-      projectType: item.projectType,
       tags: item.TagsOnProjects.map((entry) => entry.tag),
     };
   });
