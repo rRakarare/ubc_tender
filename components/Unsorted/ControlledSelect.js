@@ -20,7 +20,7 @@ export default function ControlledSelect({
   });
 
   return (
-    <FormControl py={4} isInvalid={invalid} id={id}>
+    <FormControl pb={4} isInvalid={invalid} id={id}>
       <FormLabel>{label}</FormLabel>
 
       <Select

@@ -6,27 +6,69 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
+  HStack,
   Input,
+  Text,
   useBoolean,
+  useToast,
 } from "@chakra-ui/react";
+import ControlledSelect from "../../../components/Unsorted/ControlledSelect";
+import { chakraComponents } from "chakra-react-select";
+import Image from "next/image";
+import axios from "axios";
+import { useState } from "react";
+import _ from "lodash";
 
 export async function getServerSideProps({ params }) {
   const projectId = Number(params.id);
 
   const project = await prisma.project.findFirst({
     where: { id: projectId },
-    include: { client: true },
   });
 
+  const clients = await prisma.client.findMany();
+
   return {
-    props: { project },
+    props: { project, clients },
   };
 }
 
-export default function Project({ project }) {
-  console.log(project);
+const customComponents = {
+  Option: ({ children, ...props }) => {
+    return (
+      <chakraComponents.Option {...props}>
+        <HStack spacing={4}>
+          <Image src={props.data.img} width={20} height={20} />
+          <Text>{children}</Text>
+        </HStack>
+      </chakraComponents.Option>
+    );
+  },
+  SingleValue: ({ children, ...props }) => {
+    return (
+      <chakraComponents.SingleValue {...props}>
+        <HStack spacing={4}>
+          <Image src={props.data.img} width={20} height={20} />
+          <Text>{children}</Text>
+        </HStack>
+      </chakraComponents.SingleValue>
+    );
+  },
+};
 
-  const defaultValues = project;
+export default function Project({ project, clients }) {
+  const toast = useToast();
+
+  const clientOptions = clients.map((item) => ({
+    value: item.id,
+    label: item.name,
+    img: item.imgUrl,
+  }));
+
+  const [defaultValues, setDefaultValues] = useState({
+    ...project,
+    client: clientOptions.find((client) => client.value === project.clientId),
+  });
 
   const {
     register,
@@ -35,15 +77,32 @@ export default function Project({ project }) {
     reset,
     formState: { errors },
   } = useForm({ defaultValues });
-  const [isLoading, setLoading] = useBoolean(false);
+  const [isLoading, setLoading] = useState(false);
 
   const submit = async (data) => {
-    setLoading.on();
-    setTimeout(() => {
-      setLoading.off();
-      alert(JSON.stringify(data, null, 2));
-      console.log(data);
-    }, 1);
+    if (_.isEqual(data, defaultValues)) {
+      toast({
+        title: "No Changes",
+        description: "There are no changes to update",
+        status: "info",
+        duration: 4000,
+        isClosable: true,
+      });
+      return;
+    }
+    setLoading(true);
+    const response = await axios.post("/api/project/update", data);
+    if (response.status === 200) {
+      setLoading(false);
+      setDefaultValues(data);
+      toast({
+        title: "Project Updated",
+        description: "Your Changes got updated",
+        status: "success",
+        duration: 4000,
+        isClosable: true,
+      });
+    }
   };
 
   return (
@@ -51,14 +110,9 @@ export default function Project({ project }) {
       <Navigation
         path={{ name: "Main", id: project.id }}
         submitter={handleSubmit(submit)}
+        isLoading={isLoading}
       />
-      <Container
-        mt={6}
-        as="form"
-        bg={"white"}
-        p={6}
-        onSubmit={handleSubmit(submit)}
-      >
+      <Container mt={6} as="form" bg={"white"} p={6}>
         <FormControl pb={4} isInvalid={errors.name}>
           <FormLabel htmlFor="name">Projectname</FormLabel>
           <Input id="name" placeholder="name" {...register("name", {})} />
@@ -66,9 +120,24 @@ export default function Project({ project }) {
             {errors.name && errors.name.message}
           </FormErrorMessage>
         </FormControl>
+        <ControlledSelect
+          control={control}
+          id="client"
+          name="client"
+          label="Client"
+          options={clientOptions}
+          placeholder="Client"
+          rules={{ required: "Bitte wählen" }}
+          components={customComponents}
+          closeMenuOnSelect={true}
+        />
         <FormControl pb={4} isInvalid={errors.name}>
           <FormLabel htmlFor="name">Description</FormLabel>
-          <Input id="service" placeholder="service" {...register("service", {})} />
+          <Input
+            id="service"
+            placeholder="service"
+            {...register("service", {})}
+          />
           <FormErrorMessage>
             {errors.service && errors.service.message}
           </FormErrorMessage>

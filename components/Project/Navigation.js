@@ -7,6 +7,7 @@ import {
   Text,
   VStack,
   HStack,
+  Spinner,
 } from "@chakra-ui/react";
 import { HamburgerIcon, Icon } from "@chakra-ui/icons";
 import Link from "next/link";
@@ -17,7 +18,8 @@ const navs = [
   { name: "Contents", href: "/content" },
 ];
 
-export default function Navigation({ path, submitter }) {
+export default function Navigation({ path, submitter, isLoading }) {
+
   const Navs = navs.map((item) => {
     return (
       <Link key={item.href} href={`/projekte/${path.id}${item.href}`}>
@@ -37,7 +39,7 @@ export default function Navigation({ path, submitter }) {
         </HStack>
         <MenuList>{Navs}</MenuList>
       </Menu>
-      <Icon onClick={()=>submitter()} cursor={"pointer"} w={8} h={8}  as={FaRegSave}/>
+      {isLoading ? <Spinner />:<Icon onClick={()=>submitter()} cursor={"pointer"} w={8} h={8}  as={FaRegSave}/>}
     </HStack>
   );
 }

@@ -16,6 +16,11 @@ export default function Edit({ data }) {
       selector: (row) => row.name,
       sortable: true,
     },
+    {
+      name: "Client",
+      selector: (row) => row.client,
+      sortable: true,
+    },
 
     {
       name: "Tags",
@@ -81,6 +86,7 @@ export async function getStaticProps() {
           tag: true,
         },
       },
+      client: true
     },
   });
 
@@ -88,6 +94,7 @@ export async function getStaticProps() {
     return {
       id: item.id,
       name: item.name,
+      client: item.client.name,
       tags: item.TagsOnProjects.map((entry) => entry.tag),
     };
   });
